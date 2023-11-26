@@ -1,0 +1,1 @@
+cmd_/home/mauricioapaza/modWrite/chardev.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /home/mauricioapaza/modWrite/chardev.ko /home/mauricioapaza/modWrite/chardev.o /home/mauricioapaza/modWrite/chardev.mod.o;  true
