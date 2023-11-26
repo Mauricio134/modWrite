@@ -29,7 +29,17 @@ union semun
 struct sembuf p = {0, -1, SEM_UNDO};
 struct sembuf v = {0, +1, SEM_UNDO};
 
-Union(int file_desc, char valor){
+ioctl_set_msg(int file_desc, char *message)
+{
+    int ret_val;
+    ret_val = ioctl(file_desc, IOCTL_SET_MSG, message);
+    if (ret_val < 0) {
+        printf("ioctl_set_msg failed:%d\n", ret_val);
+        exit(-1);
+    }
+}
+
+Union(int file_desc, char valor, int indice){
     int ret_val;
     char message[100];
     
@@ -39,10 +49,7 @@ Union(int file_desc, char valor){
         exit(-1);
     }
     printf("get_msg message:%s\n", message);
-    char str[2];
-    str[0] = valor;
-    str[1] = '\0';
-    strcat(message, str);
+    message[indice] = valor;
 
     printf("set_msg message:%s\n", message);
 
@@ -57,7 +64,7 @@ main()
     char c;
     int file_desc, ret_val;
     char valor;
-    char msg[100];
+    char *msg = "------------------------------\n";
     char file_path[20]; // o un tamaño suficientemente grande
     int si = semget(KEY_1, 1, 0666 | IPC_CREAT);
     int sp = semget(KEY_2, 1, 0666 | IPC_CREAT);
@@ -70,7 +77,11 @@ main()
     semctl(sc, 0, SETVAL, u);
     strcpy(file_path, "/dev/");
     strcat(file_path, DEVICE_FILE_NAME);
-    for(int i = 1; i <= 29;i+=2){
+    file_desc = open(file_path, 0);
+    ioctl_set_msg(file_desc, msg);
+    close(file_desc);
+    int j = 0; 
+    for(int i = 1; j <= 29;i+=2, j+=3){
         semop(si, &p, 1);
         file_desc = open(file_path, 0);
         if (file_desc < 0) {
@@ -78,7 +89,7 @@ main()
             exit(-1);
         }
         valor = i + '0';
-        Union(file_desc, valor);
+        Union(file_desc, valor, j);
 
         close(file_desc);
         semop(sp, &v, 1);

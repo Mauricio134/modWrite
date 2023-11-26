@@ -116,7 +116,6 @@ int i;
 #ifdef DEBUG
     printk(KERN_INFO "device_write(%p,%s,%d)", file, buffer, length);
 #endif
-    memset(Message, 0, sizeof(Message));
     for (i = 0; i < length && i < BUF_LEN; i++)
         get_user(Message[i], buffer + i);
     Message_Ptr = Message;

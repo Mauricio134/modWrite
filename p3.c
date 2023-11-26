@@ -26,7 +26,7 @@ union semun
 
 struct sembuf p = {0, -1, SEM_UNDO};
 struct sembuf v = {0, +1, SEM_UNDO};
-Union(int file_desc, char valor){
+Union(int file_desc, char valor, int indice){
     int ret_val;
     char message[100];
     
@@ -36,10 +36,7 @@ Union(int file_desc, char valor){
         exit(-1);
     }
     printf("get_msg message:%s\n", message);
-    char str[2];
-    str[0] = valor;
-    str[1] = '\0';
-    strcat(message, str);
+    message[indice] = valor;
 
     printf("set_msg message:%s\n", message);
 
@@ -63,7 +60,7 @@ main()
     strcpy(file_path, "/dev/");
     strcat(file_path, DEVICE_FILE_NAME);
 
-    int j = 3;
+    int j = 2;
     for(int i = 0; j <= 29;j+=3, i++){
         semop(sc, &p, 1);
         file_desc = open(file_path, 0);
@@ -71,8 +68,8 @@ main()
             printf("Can't open device file: %s\n", DEVICE_FILE_NAME);
             exit(-1);
         }
-        valor = 'A' + i;
-        Union(file_desc, valor);
+        valor = 'A'+i;
+        Union(file_desc, valor, j);
 
         close(file_desc);
         semop(si, &v, 1);
