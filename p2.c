@@ -28,7 +28,7 @@ struct sembuf p = {0, -1, SEM_UNDO};
 struct sembuf v = {0, +1, SEM_UNDO};
 
 
-Union(int file_desc, char valor){
+Union(int file_desc, char valor, int indice){
     int ret_val;
     char message[100];
     
@@ -38,10 +38,7 @@ Union(int file_desc, char valor){
         exit(-1);
     }
     printf("get_msg message:%s\n", message);
-    char str[2];
-    str[0] = valor;
-    str[1] = '\0';
-    strcat(message, str);
+    message[indice] = valor;
 
     printf("set_msg message:%s\n", message);
 
@@ -64,8 +61,8 @@ main()
 
     strcpy(file_path, "/dev/");
     strcat(file_path, DEVICE_FILE_NAME);
-
-    for(int i = 2; i <= 29;i+=2){
+    int j = 1;
+    for(int i = 2; j <= 29;i+=2, j+= 3){
         semop(sp, &p, 1);
         file_desc = open(file_path, 0);
         if (file_desc < 0) {
@@ -73,7 +70,7 @@ main()
             exit(-1);
         }
         valor = i + '0';
-        Union(file_desc, valor);
+        Union(file_desc, valor, j);
 
         close(file_desc);
         semop(sc, &v, 1);
